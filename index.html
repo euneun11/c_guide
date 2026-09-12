@@ -182,15 +182,38 @@
     }
 
     @media (max-width: 700px) {
+      /*
+        모바일에서는 실제 터치 영역은 충분히 유지하되,
+        이미지 위를 덮는 '버튼 박스'는 거의 보이지 않게 처리한다.
+        스와이프가 기본 조작이고 화살표는 보조 안내 역할만 한다.
+      */
       .nav {
-        width: 42px;
-        height: 58px;
-        border-radius: 12px;
-        font-size: 32px;
-        opacity: .76;
+        width: 54px;
+        height: 72px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        font-size: 36px;
+        font-weight: 200;
+        opacity: .58;
+        text-shadow:
+          0 1px 3px rgba(0,0,0,.95),
+          0 0 8px rgba(0,0,0,.75);
+        transition: opacity .12s ease, transform .12s ease;
       }
-      .prev { left: 7px; }
-      .next { right: 7px; }
+
+      .nav:hover { background: transparent; }
+      .nav:active {
+        transform: translateY(-50%) scale(.92);
+        opacity: .9;
+        background: rgba(0,0,0,.08);
+      }
+
+      .prev { left: max(2px, env(safe-area-inset-left)); }
+      .next { right: max(2px, env(safe-area-inset-right)); }
+
       .help { display: none; }
       .fullscreen { width: 38px; height: 38px; font-size: 18px; }
       .counter { font-size: 12px; padding: 7px 10px; }
