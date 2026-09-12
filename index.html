@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <title>케이브덕이 좋은 이유</title>
+  <style>
+    :root {
+      --ui-bg: rgba(0,0,0,.50);
+      --ui-border: rgba(255,255,255,.16);
+      --ui-text: #fff;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body {
+      overflow: hidden;
+      background: #111;
+      color: var(--ui-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .viewer {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, #2a2a2a 0%, #151515 55%, #0d0d0d 100%);
+    }
+
+    .slide-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .slide {
+      display: block;
+      max-width: 100vw;
+      max-height: 100dvh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      transition: opacity .16s ease;
+      -webkit-user-drag: none;
+    }
+
+    .slide.changing { opacity: .15; }
+
+    .topbar {
+      position: fixed;
+      z-index: 20;
+      top: max(14px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .counter,
+    .help {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 13px;
+      line-height: 1;
+      text-shadow: 0 1px 2px rgba(0,0,0,.55);
+    }
+
+    .help { opacity: .82; }
+
+    .nav {
+      position: fixed;
+      z-index: 25;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 54px;
+      height: 74px;
+      border: 1px solid var(--ui-border);
+      border-radius: 14px;
+      background: var(--ui-bg);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      font-weight: 200;
+      line-height: 1;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform .12s ease, background .12s ease, opacity .12s ease;
+    }
+
+    .nav:hover { background: rgba(0,0,0,.67); }
+    .nav:active { transform: translateY(-50%) scale(.95); }
+    .prev { left: max(14px, env(safe-area-inset-left)); }
+    .next { right: max(14px, env(safe-area-inset-right)); }
+
+    .bottombar {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.38);
+      padding: 0;
+      cursor: pointer;
+      transition: transform .14s ease, background .14s ease;
+    }
+
+    .dot.active {
+      background: #fff;
+      transform: scale(1.45);
+    }
+
+    .fullscreen {
+      position: fixed;
+      z-index: 25;
+      top: max(14px, env(safe-area-inset-top));
+      right: max(14px, env(safe-area-inset-right));
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--ui-border);
+      background: var(--ui-bg);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 20px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .swipe-tip {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: calc(max(14px, env(safe-area-inset-bottom)) + 48px);
+      transform: translateX(-50%);
+      white-space: nowrap;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.44);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
+      opacity: .78;
+      transition: opacity .5s ease;
+      pointer-events: none;
+    }
+
+    @media (max-width: 700px) {
+      .nav {
+        width: 42px;
+        height: 58px;
+        border-radius: 12px;
+        font-size: 32px;
+        opacity: .76;
+      }
+      .prev { left: 7px; }
+      .next { right: 7px; }
+      .help { display: none; }
+      .fullscreen { width: 38px; height: 38px; font-size: 18px; }
+      .counter { font-size: 12px; padding: 7px 10px; }
+      .bottombar { gap: 6px; padding: 8px 10px; }
+      .dot { width: 6px; height: 6px; }
+      .swipe-tip { display: block; }
+    }
+
+    @media (orientation: landscape) and (max-height: 620px) {
+      .topbar { top: 8px; }
+      .fullscreen { top: 8px; }
+      .bottombar { bottom: 8px; }
+      .swipe-tip { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .nav, .dot { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewer" id="viewer" aria-label="케이브덕 가이드 이미지 슬라이드">
+    <div class="slide-wrap">
+      <img id="slide" class="slide" src="1.png" alt="케이브덕 가이드 1번 이미지" draggable="false" />
+    </div>
+
+    <div class="topbar">
+      <div id="counter" class="counter" aria-live="polite">1 / 10</div>
+      <div class="help">← → 방향키로 넘기기</div>
+    </div>
+
+    <button class="nav prev" id="prev" type="button" aria-label="이전 이미지">‹</button>
+    <button class="nav next" id="next" type="button" aria-label="다음 이미지">›</button>
+    <button class="fullscreen" id="fullscreen" type="button" aria-label="전체 화면">⛶</button>
+
+    <div class="swipe-tip" id="swipeTip">← 좌우로 밀어서 넘기기 →</div>
+    <div class="bottombar" id="dots" aria-label="이미지 선택"></div>
+  </main>
+
+  <script>
+    (() => {
+      const TOTAL = 10;
+      const slide = document.getElementById('slide');
+      const counter = document.getElementById('counter');
+      const dots = document.getElementById('dots');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+      const viewer = document.getElementById('viewer');
+      const fullscreenBtn = document.getElementById('fullscreen');
+      const swipeTip = document.getElementById('swipeTip');
+
+      let index = 1;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let pointerStartX = 0;
+      let pointerDown = false;
+
+      const dotButtons = [];
+      for (let i = 1; i <= TOTAL; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'dot' + (i === 1 ? ' active' : '');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `${i}번 이미지 보기`);
+        btn.addEventListener('click', () => show(i));
+        dots.appendChild(btn);
+        dotButtons.push(btn);
+      }
+
+      function normalize(n) {
+        if (n < 1) return TOTAL;
+        if (n > TOTAL) return 1;
+        return n;
+      }
+
+      function preload(n) {
+        const img = new Image();
+        img.src = `${normalize(n)}.png`;
+      }
+
+      function updateUi() {
+        counter.textContent = `${index} / ${TOTAL}`;
+        dotButtons.forEach((dot, i) => dot.classList.toggle('active', i === index - 1));
+        slide.alt = `케이브덕 가이드 ${index}번 이미지`;
+        history.replaceState(null, '', `#${index}`);
+        preload(index - 1);
+        preload(index + 1);
+      }
+
+      function show(n) {
+        const next = normalize(n);
+        if (next === index && slide.complete) return;
+        index = next;
+        slide.classList.add('changing');
+        const src = `${index}.png`;
+        const img = new Image();
+        img.onload = () => {
+          slide.src = src;
+          requestAnimationFrame(() => slide.classList.remove('changing'));
+          updateUi();
+        };
+        img.onerror = () => {
+          slide.classList.remove('changing');
+          alert(`${src} 파일을 불러오지 못했습니다.`);
+        };
+        img.src = src;
+      }
+
+      function next() { show(index + 1); }
+      function prev() { show(index - 1); }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') prev();
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          next();
+        }
+        if (e.key === 'Home') show(1);
+        if (e.key === 'End') show(TOTAL);
+      });
+
+      viewer.addEventListener('touchstart', (e) => {
+        if (!e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      viewer.addEventListener('touchend', (e) => {
+        if (!e.changedTouches.length) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          dx < 0 ? next() : prev();
+          swipeTip.style.opacity = '0';
+        }
+      }, { passive: true });
+
+      viewer.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse') {
+          pointerDown = true;
+          pointerStartX = e.clientX;
+        }
+      });
+
+      viewer.addEventListener('pointerup', (e) => {
+        if (!pointerDown || e.pointerType !== 'mouse') return;
+        pointerDown = false;
+        const dx = e.clientX - pointerStartX;
+        if (Math.abs(dx) > 100) dx < 0 ? next() : prev();
+      });
+
+      fullscreenBtn.addEventListener('click', async () => {
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
+        } catch (_) {}
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        fullscreenBtn.textContent = document.fullscreenElement ? '×' : '⛶';
+        fullscreenBtn.setAttribute('aria-label', document.fullscreenElement ? '전체 화면 종료' : '전체 화면');
+      });
+
+      // 주소 끝의 #3 같은 값으로 특정 장을 바로 열 수 있음.
+      const hashIndex = Number(location.hash.replace('#', ''));
+      if (Number.isInteger(hashIndex) && hashIndex >= 1 && hashIndex <= TOTAL) {
+        index = hashIndex;
+        slide.src = `${index}.png`;
+      }
+      updateUi();
+
+      // 처음 로드할 때 이웃 이미지를 미리 준비.
+      preload(index + 1);
+      preload(index - 1);
+
+      // 모바일 안내 문구는 잠시 후 자연스럽게 사라짐.
+      setTimeout(() => { swipeTip.style.opacity = '0'; }, 4200);
+    })();
+  </script>
+</body>
+</html>
